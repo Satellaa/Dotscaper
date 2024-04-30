@@ -35,7 +35,7 @@ class Executor:
 	update/insert information from Yugipedia properly.
 	"""
 	def update_cards(self, update_yaml_yugi=True, update_yugipedia=False):
-		cards: list[Card] = []
+		cards = []
 		if update_yaml_yugi and (yaml_cards := self.yaml_scraper.scrape()):
 			cards += yaml_cards
 		if update_yugipedia and (yugipedia_cards := self.yugipedia_scraper.scrape_all()):

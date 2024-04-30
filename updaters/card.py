@@ -1,4 +1,3 @@
-import time
 from utils.card import Card, CardPrice
 from utils.filter import Filter
 from utils.string_manip import half_to_full
