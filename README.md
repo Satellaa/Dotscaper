@@ -20,7 +20,7 @@ See [.env](.env)
 
 ## Usage
 
-You can run `python main.py` with the following parameters:
+You can run `python main.py` with the following arguments:
 | Name  | Description | Condition |
 | ------------- | ------------- | ------------- |
 | `--init`  | Scrape card information and prices, then store it in MongoDB.  | Must be used first.              |

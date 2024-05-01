@@ -1,5 +1,4 @@
 import requests
-import os
 import time
 from urllib import parse
 from utils.card import Card, Name, Sets
@@ -9,14 +8,14 @@ from typing import Optional
 from . fetch import get_response
 
 """
-There are some things like set numbers in Asian English that
-cannot be obtained from YAML Yugi, so we will have to rely on Yugipedia.
+We will have to use Yugipedia because YAML Yugi does not have
+some things, like set numbers in Asian English.
 """
 class YugipediaScraper:
 	def __init__(self):
 		self.session = requests.Session()
-		# Yugipedia requires you to leave service and contact information
-		self.session.headers.update({"User-Agent": f"Discord/lilacgrimoire requests/{requests.__version__} py/{python_version()}"})
+		# Yugipedia requires you to leave service and contact information.
+		self.session.headers.update({"User-Agent": f"https://github.com/Satellaa/Dotscaper.git requests/{requests.__version__} py/{python_version()}"})
 		
 		self.asian_english_endpoint = self.create_yugipedia_endpoint("Asian-English", limit=5000)
 		self.tokens_endpoint = self.create_yugipedia_endpoint("Japanese", "[[Set contains.English name::Token]]")
@@ -53,7 +52,6 @@ class YugipediaScraper:
 	
 	def scrape(self, url: str, set_language: str="ja") -> Optional[list[Card]]:
 		response = get_response(self.session.get, url)
-		print(response)
 		if response:
 			return self.parse_cards(response.json(), set_language)
 	
