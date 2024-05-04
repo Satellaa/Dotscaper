@@ -52,7 +52,7 @@ class TCGCornerScraper:
 			to one every 20 to 25 seconds.
 			"""
 			time.sleep(random.randint(20, 25))
-			logger.info(f"TCG Corner - Completed scraping page number: {page}")
+			logger.info(f"TCG Corner - Completed scraping page number: {page - 1}")
 			page += 1
 
 		return card_prices
