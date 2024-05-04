@@ -41,7 +41,7 @@ class CardPriceUpdater:
 			try:
 				if (operation := self.create_update_operation(card_price)):
 					self.operations.append(operation)
-			except AttributeError as e:
+			except KeyError as e:
 				logger.warning(f"card price: {card} ---- {e}")
 	
 	def create_update_operation(self, card_price: CardPrice) -> Optional[UpdateOne]:

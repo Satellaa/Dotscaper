@@ -34,7 +34,7 @@ class CardUpdater:
 			try:
 				operation = self.create_update_operation(card)
 				self.operations.append(operation)
-			except AttributeError as e:
+			except KeyError as e:
 				logger.warning(f"card: {card} ---- {e}")
 	
 	def create_update_operation(self, card: Card) -> UpdateOne:
