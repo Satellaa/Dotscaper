@@ -78,8 +78,8 @@ class TCGCornerScraper:
 				name = name,
 				set_number = set_number,
 				rarity = rarity,
-				status = status,
 				condition = "Good",
+				status = status,
 				last_modified = int(time.time())
 			)
 			return card_price

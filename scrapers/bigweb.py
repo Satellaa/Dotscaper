@@ -69,8 +69,8 @@ class BigwebScraper:
 				name=name,
 				set_number=set_number,
 				rarity=rarity,
-				status=status,
 				condition=condition,
+				status=status,
 				last_modified=int(time.time()),
 				comment=comment
 			)

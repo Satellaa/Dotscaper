@@ -6,8 +6,8 @@ class CardPrice(TypedDict):
 	name: str
 	set_number: str
 	rarity: str
-	status: str
 	condition: str
+	status: str
 	last_modified: int
 	comment: str # Only used for bigweb, to check the validity of card price
 
