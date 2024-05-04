@@ -20,13 +20,16 @@ class YAMLYugiScraper:
 	def parse_cards(self, raw_cards: list[dict]) -> list[Card]:
 		cards = []
 		for raw_card in raw_cards:
-			konami_id = raw_card["konami_id"]
+			konami_id = raw_card.get("konami_id", 0)
 			if not konami_id:
 				continue
 			
 			ja_sets = remove_duplicates_sets(self.parse_ja_sets(raw_card))
 			password = raw_card.get("password", 0)
 			en_name, ja_name = self.parse_names(raw_card)
+			
+			if isinstance(password, str):
+				password = int(password)
 			
 			card = Card(
 				name=Name(en=en_name, ja=ja_name),

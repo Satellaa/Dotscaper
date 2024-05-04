@@ -6,7 +6,10 @@ import json
 from typing import Optional
 from utils.string_manip import half_to_full
 from utils.card import CardPrice
+from utils.logger import setup_logger
 from . fetch import get_response
+
+logger = setup_logger("Bigweb scraper", "bigweb_scraper.log")
 
 class BigwebScraper:
 	def __init__(self):
@@ -43,7 +46,7 @@ class BigwebScraper:
 				break
 			
 			time.sleep(random.randint(5, 6))
-			print("\nBigweb - Finished scratching page number: ", page)
+			logger.info(f"Bigweb - Completed scraping page number: {page}")
 			page += 1
 		
 		return card_prices
@@ -76,7 +79,6 @@ class BigwebScraper:
 			)
 			
 		except Exception as e:
-			print("An error occurred: ", e)
 			return None
 	
 	def parse_rarity(self, rarity: Optional[dict]) -> str:

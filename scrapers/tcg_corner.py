@@ -5,7 +5,10 @@ import time
 from selectolax.lexbor import LexborHTMLParser
 from typing import Optional
 from utils.card import CardPrice
+from utils.logger import setup_logger
 from . fetch import get_response
+
+logger = setup_logger("TCG Corner scraper", "tcg_corner_scraper.log")
 
 class TCGCornerScraper:
 	def __init__(self):
@@ -49,7 +52,7 @@ class TCGCornerScraper:
 			to one every 20 to 25 seconds.
 			"""
 			time.sleep(random.randint(20, 25))
-			print("\nTCG Corner - Finished scratching page number: ", page - 1)
+			logger.info(f"TCG Corner - Completed scraping page number: {page}")
 			page += 1
 
 		return card_prices
@@ -85,7 +88,7 @@ class TCGCornerScraper:
 			return card_price
 		
 		except AttributeError as e:
-			print(f"Attribute Error: {e}")
+			logger.warning(f"Attribute Error: {e}")
 		
 		return None
 		

@@ -5,7 +5,7 @@ class Filter():
 	def create_name_filter(language: str, query: str) -> dict:
 		return {
 			"$search": {
-				"index": f"name_search",
+				"index": "name_search",
 				"text": {
 					"query": query,
 					"path": f"name.{language}",

@@ -1,8 +1,11 @@
 from utils.card import Card, CardPrice
 from utils.filter import Filter
+from utils.logger import setup_logger
 from pymongo import UpdateOne
 from pymongo.collection import Collection
 from typing import Optional
+
+logger = setup_logger("card price updater", "card_price_updater.log")
 
 class CardPriceUpdater:
 	def __init__(self, coll: Collection[Card], market: str):
@@ -28,15 +31,18 @@ class CardPriceUpdater:
 		if self.operations:
 			self.coll.bulk_write(self.operations, ordered=False)
 		else:
-			print("updaters/card_price.py: There are no operations to complete.")
+			logger.debug("There are no operations to complete.")
 	
 	def add(self, card_prices: Optional[list[CardPrice]]):
 		if not card_prices:
 			return
 		
 		for card_price in card_prices:
-			if (operation := self.create_update_operation(card_price)):
-				self.operations.append(operation)
+			try:
+				if (operation := self.create_update_operation(card_price)):
+					self.operations.append(operation)
+			except AttributeError as e:
+				logger.warning(f"card price: {card} ---- {e}")
 	
 	def create_update_operation(self, card_price: CardPrice) -> Optional[UpdateOne]:
 		card = self.find_card(card_price)
@@ -98,7 +104,7 @@ class CardPriceUpdater:
 			return None
 		
 		if card["name"]["ja"] != card_price["name"] and card["konami_id"] != 0:
-			print(card_price, "\n", card, "\n\n")
+			logger.debug(f"{card_price}\n!=\n{card}")
 		
 		return card
 	

@@ -1,9 +1,12 @@
 from utils.card import Card, CardPrice
 from utils.filter import Filter
 from utils.string_manip import half_to_full
+from utils.logger import setup_logger
 from pymongo import UpdateOne
 from pymongo.collection import Collection
 from typing import Optional
+
+logger = setup_logger("card info updater", "card_info_updater.log")
 
 class CardUpdater:
 	def __init__(self, coll: Collection[Card]):
@@ -15,7 +18,7 @@ class CardUpdater:
 			self.coll.bulk_write(self.operations, ordered=False)
 			self.set_card_prices_field()
 		else:
-			print("updaters/card.py: There are no operations to complete.")
+			logger.debug("There are no operations to complete.")
 	
 	def set_card_prices_field(self):
 		filter = {"card_prices": {"$exists": False}}
@@ -28,8 +31,11 @@ class CardUpdater:
 			return
 		
 		for card in cards:
-			operation = self.create_update_operation(card)
-			self.operations.append(operation)
+			try:
+				operation = self.create_update_operation(card)
+				self.operations.append(operation)
+			except AttributeError as e:
+				logger.warning(f"card: {card} ---- {e}")
 	
 	def create_update_operation(self, card: Card) -> UpdateOne:
 		filter = {"konami_id": card["konami_id"]} if card["konami_id"] > 0 else {"name.en": card["name"]["en"]}
