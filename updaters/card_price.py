@@ -103,8 +103,11 @@ class CardPriceUpdater:
 		or not card_price["comment"] or card_price["rarity"] == "-":
 			return None
 		
+		"""
+		Simply to check if there is a card price's name is not the same as the card's name.
+		"""
 		if card["name"]["ja"] != card_price["name"] and card["konami_id"] != 0:
-			logger.debug(f"{card_price}\n!=\n{card}")
+			logger.debug(f"id {card['_id']}: {card_price['name']} != {card['name']['ja']}")
 		
 		return card
 	
