@@ -42,7 +42,9 @@ class CardPriceUpdater:
 				if (operation := self.create_update_operation(card_price)):
 					self.operations.append(operation)
 			except KeyError as e:
-				logger.warning(f"card price: {card} ---- {e}")
+				logger.warning(f"card price: {card_price} ---- does not have a key name: {e}")
+			except Exception as e:
+				logger.warning(e)
 	
 	def create_update_operation(self, card_price: CardPrice) -> Optional[UpdateOne]:
 		card = self.find_card(card_price)
