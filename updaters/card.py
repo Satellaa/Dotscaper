@@ -35,9 +35,7 @@ class CardUpdater:
 				operation = self.create_update_operation(card)
 				self.operations.append(operation)
 			except KeyError as e:
-				logger.warning(f"card: {card} ---- does not have a key name: {e}")
-			except Exception as e:
-				logger.warning(e)
+				logger.warning(f"card: {card} ---- {e}")
 	
 	def create_update_operation(self, card: Card) -> UpdateOne:
 		filter = {"konami_id": card["konami_id"]} if card["konami_id"] > 0 else {"name.en": card["name"]["en"]}
