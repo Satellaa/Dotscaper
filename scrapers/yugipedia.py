@@ -68,10 +68,8 @@ class YugipediaScraper:
 			if (not set_number and not ja_name) or (not en_name and konami_id < 0):
 				continue
 			
-			if isinstance(password, str):
+			if password == password:
 				password = int(password)
-			if isinstance(konami_id, str):
-				konami_id = int(konami_id)
 			
 			card = Card(
 				name=Name(en=en_name, ja=ja_name),
