@@ -28,7 +28,7 @@ class YAMLYugiScraper:
 			password = raw_card.get("password", 0)
 			en_name, ja_name = self.parse_names(raw_card)
 			
-			if isinstance(password, str):
+			if password == password:
 				password = int(password)
 			
 			card = Card(
