@@ -109,9 +109,8 @@ class YugipediaScraper:
             local: str,
             conditions: str = "",
             limit: int = 500) -> str:
-        params = {"action": "ask", "query": f"""[[-Has subobject.Locality::{local}]] {conditions}
-            |?Card number|?Set contains.English name|?Set contains.Japanese base name|
-                                                                        ?Set contains.Database ID|?Set contains.Password|limit={
-            limit}|offset=0""", "format": "json"}
+        params = {"action": "ask", "query": f"""[[-Has subobject.Locality::{local}]] {
+            conditions}|?Card number|?Set contains.English name|?Set contains.Japanese base name|?Set contains.Database ID|?Set contains.Password|
+            limit={limit}|offset=0""", "format": "json"}
 
         return f"https://yugipedia.com/api.php?{parse.urlencode(params)}"
