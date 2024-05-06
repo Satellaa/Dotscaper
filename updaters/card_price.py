@@ -4,8 +4,8 @@ from pymongo import UpdateOne
 from pymongo.collection import Collection
 
 from utils.card import Card, CardPrice
-from utils.logger import setup_logger
 from utils.query import create_name_filter
+from utils.logger import setup_logger
 
 logger = setup_logger("card price updater", "logs/card_price_updater.log")
 

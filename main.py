@@ -1,10 +1,8 @@
-import argparse
 import os
 import sys
-
+import argparse
 import trio
 from dotenv import load_dotenv
-
 from executor import Executor
 
 load_dotenv()
