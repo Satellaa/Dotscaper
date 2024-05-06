@@ -29,4 +29,4 @@ You can run `python main.py` with the following arguments:
 
 ## Contributing
 
-Please use pre commit.
+Please use [pre-commit](https://pre-commit.com/).
