@@ -1,0 +1,14 @@
+repos:
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+  - repo: https://github.com/hhatto/autopep8
+    rev: "0fa37c2"
+    hooks:
+      - id: autopep8
+  - repo: https://github.com/PyCQA/pylint
+    rev: "053c2c3"
+    hooks:
+      - id: pylint
+        args: [--disable=import-error]
