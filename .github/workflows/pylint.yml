@@ -34,9 +34,9 @@ jobs:
       run: |
         if ${{ github.event_name == 'pull_request' }}; then
           echo "changed_files=$(git diff --name-only -r HEAD^1 HEAD | grep '\.py$') | xargs)" >> $GITHUB_OUTPUT
-      else
+        else
           echo "changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '\.py$') | xargs)" >> $GITHUB_OUTPUT
-      fi
+        fi
 
     - name: Run pylint on changed files
       run: |
