@@ -1,0 +1,22 @@
+[tool.autopep8]
+max-line-length = 150
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = [
+    "C0114", # missing-module-docstring
+    "C0115", # missing-class-docstring
+    "C0116", # missing-function-docstring
+    "W0105", # pointless-string-statement
+    "R0902", # too-many-instance-attributes
+    "W1203", # logging-fstring-interpolation
+    "W0718", # broad-exception-
+    "R0124", # comparison-with-itself,
+    "W0622", # redefined-builtin
+    "R0801", 
+]
+
+[tool.pylint.FORMAT]
+max-line-length = 150
+
+[tool.pylint.MASTER]
+init-hook="from pylint.config import find_default_config_files; import os, sys; sys.path.append(os.path.dirname(next(find_default_config_files())))"

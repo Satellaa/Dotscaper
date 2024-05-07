@@ -29,4 +29,4 @@ You can run `python main.py` with the following arguments:
 
 ## Contributing
 
-Please use tabs rather than spaces.
+Please use [pre-commit](https://pre-commit.com/).
