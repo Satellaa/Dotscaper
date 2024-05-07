@@ -11,33 +11,54 @@ on:
       - "**/**.py"
 
 jobs:
-  pylint:
+  changedfiles:
     runs-on: ubuntu-latest
+    outputs:
+      py: ${{ steps.set-changed-files.outputs.py }}
     steps:
     - name: Check out repository code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Get changed files
+      id: set-changed-files
+      run: |
+        if ${{ github.event_name == 'pull_request' }}; then
+          echo "py=$(git diff --name-only -r HEAD^1 HEAD | grep .py$ | xargs)" >> $GITHUB_OUTPUT
+        else
+          echo "py=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep .py$ | xargs)" >> $GITHUB_OUTPUT
+        fi
 
+  pylint:
+    runs-on: ubuntu-latest
+    needs: changedfiles
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12.3'
-
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y bc
         python -m pip install --upgrade pip
-        pip install pylint
-
-    - name: Run pylint
+        pip install -r requirements.txt
+    - name: Run pylint on changed files
       run: |
-        pylint $(find . -type f -name "*.py") --exit-zero
-
+        if [ -n "${{ needs.changedfiles.outputs.py }}" ]; then
+          pylint ${{ needs.changedfiles.outputs.py }} --exit-zero
+        else
+          echo "No Python files to lint."
+        fi
     - name: Check pylint score
       run: |
-        score=$(pylint --output-format=text $(find . -type f -name "*.py") | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/10.*/\1/p')
-        echo "Pylint score: $score"
-        if (( $(echo "$score < 8.0" | bc -l) )); then
-          echo "Pylint score is less than 8.0, failing the check..."
-          exit 1
+        if [ -n "${{ needs.changedfiles.outputs.py }}" ]; then
+          score=$(pylint --output-format=text ${{ needs.changedfiles.outputs.py }} | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/10.*/\1/p')
+          echo "Pylint score: $score"
+          if (( $(echo "$score < 10" | bc -l) )); then
+            echo "Pylint score is less than 10, failing the check..."
+            exit 1
+          fi
+        else
+          echo "No Python files to lint, skipping score check."
         fi
