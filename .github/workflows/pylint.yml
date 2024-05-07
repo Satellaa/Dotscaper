@@ -16,28 +16,26 @@ jobs:
     steps:
     - name: Check out repository code
       uses: actions/checkout@v4
-
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12.3'
-
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y bc
         python -m pip install --upgrade pip
         pip install pylint
-
-    - name: Run pylint
+    - name: Get changed files
+      id: files
       run: |
-        pylint $(find . -type f -name "*.py") --exit-zero
-
-    - name: Check pylint score
+        echo "::set-output name=python_files::$(git fetch origin ${{ github.base_ref }} && git diff --name-only ${{ github.base_ref }} | grep '\.py$')"
+    - name: Run Pylint on changed files
       run: |
-        score=$(pylint --output-format=text $(find . -type f -name "*.py") | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/10.*/\1/p')
+        pylint ${{ steps.files.outputs.python_files }} --exit-zero
+    - name: Fail if score is less than 10
+      run: |
+        score=$(pylint --output-format=text ${{ steps.files.outputs.python_files }} | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p')
         echo "Pylint score: $score"
-        if (( $(echo "$score < 8.0" | bc -l) )); then
-          echo "Pylint score is less than 8.0, failing the check..."
+        if (( $(echo "$score < 10" | bc -l) )); then
+          echo "Pylint score is less than 10, failing the workflow."
           exit 1
         fi
