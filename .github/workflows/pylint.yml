@@ -46,7 +46,7 @@ jobs:
     - name: Run pylint on changed files
       run: |
         if [ -n "${{ needs.changedfiles.outputs.py }}" ]; then
-          pylint ${{ steps.set-changed-files.outputs.changed-files }} --exit-zero
+          pylint ${{ needs.changedfiles.outputs.py }} --exit-zero
         else
           echo "No Python files to lint."
         fi
