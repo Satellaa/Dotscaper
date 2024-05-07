@@ -2,9 +2,8 @@ from typing import Optional
 
 import requests
 
-from utils.card import Card, Name, Sets, remove_duplicates_sets
-from utils.string_manip import parse_and_expand_ruby
-
+from ..utils.card import Card, Name, Sets, remove_duplicates_sets
+from ..utils.string_manip import parse_and_expand_ruby
 from .fetch import get_response
 
 """

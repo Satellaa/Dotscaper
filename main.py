@@ -5,7 +5,7 @@ import sys
 import trio
 from dotenv import load_dotenv
 
-from executor import Executor
+from module.executor import Executor
 
 load_dotenv()
 

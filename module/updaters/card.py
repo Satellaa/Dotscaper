@@ -3,9 +3,9 @@ from typing import Optional
 from pymongo import UpdateOne
 from pymongo.collection import Collection
 
-from utils.card import Card
-from utils.logger import setup_logger
-from utils.string_manip import half_to_full
+from ..utils.card import Card
+from ..utils.logger import setup_logger
+from ..utils.string_manip import half_to_full
 
 logger = setup_logger("card info updater", "logs/card_info_updater.log")
 

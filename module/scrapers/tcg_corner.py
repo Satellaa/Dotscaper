@@ -6,9 +6,8 @@ from typing import Optional
 import requests
 from selectolax.lexbor import LexborHTMLParser
 
-from utils.card import CardPrice
-from utils.logger import setup_logger
-
+from ..utils.card import CardPrice
+from ..utils.logger import setup_logger
 from .fetch import get_response
 
 logger = setup_logger("TCG Corner scraper", "logs/tcg_corner_scraper.log")
@@ -51,7 +50,6 @@ class TCGCornerScraper:
                 card_price = self.parse_card_price(item)
                 if card_price:
                     card_prices.append(card_price)
-
             """
 			As TCG Corner prohibits information scraping on their website,
 			I make an effort to limit the number of requests

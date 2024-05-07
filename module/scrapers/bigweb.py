@@ -6,10 +6,9 @@ from typing import Optional
 
 import requests
 
-from utils.card import CardPrice
-from utils.logger import setup_logger
-from utils.string_manip import half_to_full
-
+from ..utils.card import CardPrice
+from ..utils.logger import setup_logger
+from ..utils.string_manip import half_to_full
 from .fetch import get_response
 
 logger = setup_logger("Bigweb scraper", "logs/bigweb_scraper.log")
@@ -45,7 +44,6 @@ class BigwebScraper:
                 card_price = self.parse_card_price(raw_card)
                 if card_price:
                     card_prices.append(card_price)
-
             if page >= int(data["pagenate"]["pageCount"]):
                 break
 

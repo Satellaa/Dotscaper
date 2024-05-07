@@ -5,9 +5,8 @@ from urllib import parse
 
 import requests
 
-from utils.card import Card, Name
-from utils.safe import get
-
+from ..utils.card import Card, Name
+from ..utils.safe import get
 from .fetch import get_response
 
 """

@@ -3,13 +3,13 @@ from pymongo.mongo_client import MongoClient
 from trio import open_nursery
 from trio.to_thread import run_sync
 
-from scrapers.bigweb import BigwebScraper
-from scrapers.tcg_corner import TCGCornerScraper
-from scrapers.yaml_yugi import YAMLYugiScraper
-from scrapers.yugipedia import YugipediaScraper
-from updaters.card import CardUpdater
-from updaters.card_price import CardPriceUpdater
-from utils.card import Card
+from .scrapers.bigweb import BigwebScraper
+from .scrapers.tcg_corner import TCGCornerScraper
+from .scrapers.yaml_yugi import YAMLYugiScraper
+from .scrapers.yugipedia import YugipediaScraper
+from .updaters.card import CardUpdater
+from .updaters.card_price import CardPriceUpdater
+from .utils.card import Card
 
 
 class Executor:
