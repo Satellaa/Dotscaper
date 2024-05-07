@@ -32,20 +32,24 @@ jobs:
     - id: set-changed-files
       name: Get list of changed files
       run: |
-        echo "py-files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$')" >> "$GITHUB_OUTPUT"
+        if ${{ github.event_name == 'pull_request' }}; then
+          echo "changed_files=$(git diff --name-only -r HEAD^1 HEAD | grep '\.py$') | xargs)" >> $GITHUB_OUTPUT
+      else
+          echo "changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '\.py$') | xargs)" >> $GITHUB_OUTPUT
+      fi
 
     - name: Run pylint on changed files
       run: |
-        if [ -n "${{ steps.set-changed-files.outputs.py-files }}" ]; then
-          pylint ${{ steps.set-changed-files.outputs.py-files }} --exit-zero
+        if [ -n "${{ steps.set-changed-files.outputs.changed-files }}" ]; then
+          pylint ${{ steps.set-changed-files.outputs.changed-files }} --exit-zero
         else
           echo "No Python files to lint."
         fi
 
     - name: Check pylint score
       run: |
-        if [ -n "${{ steps.set-changed-files.outputs.py-files }}" ]; then
-          score=$(pylint --output-format=text ${{ steps.set-changed-files.outputs.py-files }} | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/10.*/\1/p')
+        if [ -n "${{ steps.set-changed-files.outputs.changed-files }}" ]; then
+          score=$(pylint --output-format=text ${{ steps.set-changed-files.outputs.changed-files }} | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/10.*/\1/p')
           echo "Pylint score: $score"
           if (( $(echo "$score < 8.0" | bc -l) )); then
             echo "Pylint score is less than 8.0, failing the check..."
