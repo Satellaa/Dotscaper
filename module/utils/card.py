@@ -41,6 +41,11 @@ class Card(TypedDict):
     card_prices: CardPrices
 
 
+def id_from_info(info: str) -> int:
+    return int(
+        str(int.from_bytes(info.upper().strip().encode(), byteorder="big"))[::-1][0:8])
+
+
 def remove_duplicates_sets(sets: list[dict]) -> list:
     seen = set()
     unique = []
