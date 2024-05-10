@@ -1,3 +1,4 @@
+# main.py
 import argparse
 import os
 import sys
@@ -12,23 +13,9 @@ load_dotenv()
 
 class CardManager:
     def __init__(self):
-        self.parser = argparse.ArgumentParser(
-            description="Manage card information and prices.")
-        self.parser.add_argument(
-            "--init",
-            action="store_true",
-            help="Upsert card information and prices"
-        )
-        self.parser.add_argument(
-            "--update-card-info",
-            action="store_true",
-            help="Upsert card information from YAML Yugi or Yugipedia"
-        )
-        self.parser.add_argument(
-            "--update-card-prices",
-            action="store_true",
-            help="Upsert card prices from Bigweb or TCG Corner"
-        )
+        self.parser = argparse.ArgumentParser(description="Manage card information and prices.")
+        self.parser.add_argument("--update-card-info", action="store_true", help="Upsert card information from YAML Yugi or Yugipedia")
+        self.parser.add_argument("--update-card-prices", action="store_true", help="Upsert card prices from selected market")
         self.args = self.parser.parse_args()
         self.executor = None
 
@@ -46,67 +33,53 @@ class CardManager:
 
         self.executor = Executor(uri, db_name, coll_name)
 
-    def handle_choice(self, update_info=False, update_prices=False):
-        if update_info:
-            source = self.get_user_choice(
-                "Card information", [
-                    "YAML Yugi", "Yugipedia"])
-            self.update_card_info(source)
-        elif update_prices:
-            source = self.get_user_choice(
-                "Card prices", ["Bigweb", "Yuyutei", "TCG Corner"])
-            self.update_card_prices(source)
+    def update_card_info(self):
+        source = self.get_user_choice(
+            "Card information", ["YAML Yugi", "Yugipedia", "All"])
+        print(f"Updating card information from {source}...")
+        trio.run(self.executor.update_cards, source)
 
-    def get_user_choice(self, update_type, sources):
+    def update_card_prices(self):
+        sources = ["Bigweb", "Yuyutei", "TCG Corner"]
+        source = self.get_user_choice("Card prices", sources + ["All"])
+        if source == "All":
+            markets_to_update = sources
+        else:
+            markets_to_update = [source]
+
+        print(f"Updating prices from {', '.join(markets_to_update)}...")
+        trio.run(self.executor.update_prices, markets_to_update)
+
+    def get_user_choice(self, update_type: str, sources: list[str]):
+        while True:
+            self.print_menu(update_type, sources)
+            choice = input("Enter your selection: ")
+            try:
+                if int(choice) == len(sources) + 1:
+                    sys.exit(0)
+                elif (int(choice) - 1) < len(sources):
+                    return sources[int(choice) - 1]
+                else:
+                    print("Invalid selection.")
+            except ValueError:
+                print("Please enter a number corresponding to the options.")
+
+            print("Please try again")
+
+    def print_menu(self, update_type: str, sources: list[str]):
         print(f"Select the update source for {update_type}:")
         for i, source in enumerate(sources, 1):
-            print(f"{i}. Only update from {source}")
-        print(f"{len(sources) + 1}. Update from all")
-        print(f"{len(sources) + 2}. Quit")
-        choice = input("Enter your selection: ")
-
-        if int(choice) == len(sources) + 2:
-            sys.exit(0)
-
-        return choice
-
-    def update_card_info(self, choice):
-        if choice == "1":
-            print("Upsert card information from YAMI Yugi...")
-            self.executor.update_cards()
-        elif choice == "2":
-            print("Upsert card information from Yugipedia...")
-            self.executor.update_cards(False, True)
-        elif choice == "3":
-            print("Upsert card information from both YAMI Yugi and Yugipedia...")
-            self.executor.update_cards(True, True)
-        else:
-            print("Invalid selection.")
-
-    def update_card_prices(self, choice):
-        if choice == "1":
-            print("Upsert card prices from Bigweb...")
-            trio.run(self.executor.update_prices, True)
-        elif choice == "2":
-            print("Upsert card prices from Yuyu-tei...")
-            trio.run(self.executor.update_prices, False, True)
-        elif choice == "3":
-            print("Upsert card prices from TCG Corner...")
-            trio.run(self.executor.update_prices, False, False, True)
-        elif choice == "4":
-            print("Upsert card prices from Bigweb, Yuyutei and TCG Corner...")
-            trio.run(self.executor.update_prices, True, True, True)
-        else:
-            print("Invalid selection.")
+            print(f"{i}. Update from {source}")
+        print(f"{len(sources) + 1}. Exit")
 
 
 if __name__ == "__main__":
     manager = CardManager()
     manager.setup_executor()
-    if manager.args.init:
-        manager.update_card_info("3")
-        manager.update_card_prices("3")
-    elif manager.args.update_card_info:
-        manager.handle_choice(update_info=True)
+    if manager.args.update_card_info:
+        manager.update_card_info()
     elif manager.args.update_card_prices:
-        manager.handle_choice(update_prices=True)
+        manager.update_card_prices()
+    else:
+        print("No action specified. Use --help to see available options.")
+        sys.exit(1)
