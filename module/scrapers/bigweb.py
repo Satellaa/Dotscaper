@@ -27,8 +27,9 @@ class BigwebScraper:
 
         self.rarity_alias = self.load_rarity_alias()
 
-    def scrape(self, page: int = 1) -> list[CardPrice]:
+    def scrape(self) -> list[CardPrice]:
         card_prices = []
+        page = 1
         while True:
             url = f"https://api.bigweb.co.jp/products?game_id=9&page={page}"
             response = get_response(self.session.get, url)

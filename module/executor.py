@@ -37,7 +37,7 @@ class Executor:
             "Yuyutei": CardPriceUpdater(self.coll, "yuyutei", True)
         }
 
-    def update_cards(self, source):
+    def update_cards(self, source: str):
         cards: list[Card] = []
         if source == "YAML Yugi":
             cards += self.info_scrapers[source].scrape()
@@ -50,7 +50,7 @@ class Executor:
         self.updaters["Card info"].add(cards)
         self.updaters["Card info"].execute()
 
-    async def update_prices(self, markets):
+    async def update_prices(self, markets: list[str]):
         async with open_nursery() as nursery:
             for market in markets:
                 if market in self.prices_scrapers and market in self.updaters:

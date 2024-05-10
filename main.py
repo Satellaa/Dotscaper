@@ -36,7 +36,7 @@ class CardManager:
         source = self.get_user_choice(
             "Card information", ["YAML Yugi", "Yugipedia", "All"])
         print(f"Updating card information from {source}...")
-        trio.run(self.executor.update_cards, source)
+        self.executor.update_cards(source)
 
     def update_card_prices(self):
         sources = ["Bigweb", "Yuyutei", "TCG Corner"]
