@@ -16,72 +16,51 @@ from .utils.card import Card
 class Executor:
     def __init__(self, uri: str, db: str, coll: str):
         self.client = MongoClient(uri)
-        self.client.admin.command("ping")
-        print("Pinged your deployment. You successfully connected to MongoDB!")
-
         self.db = self.client[db]
         self.coll: Collection[Card] = self.db[coll]
 
-        self.yaml_scraper = YAMLYugiScraper()
-        self.yugipedia_scraper = YugipediaScraper()
-        self.bigweb_scraper = BigwebScraper()
-        self.yuyutei_scraper = YuyuteiScraper()
-        self.yuyutei_kizu_scraper = YuyuteiScraper("kizu=1")
-        self.tcg_corner_scraper = TCGCornerScraper()
+        self.info_scrapers = {
+            "YAML Yugi": YAMLYugiScraper(),
+            "Yugipedia": YugipediaScraper(),
+        }
 
-        self.card_info_updater = CardUpdater(self.coll)
-        self.tcg_corner_updater = CardPriceUpdater(self.coll, "tcg_corner")
-        self.bigweb_updater = CardPriceUpdater(self.coll, "bigweb", True)
-        self.yuyutei_updater = CardPriceUpdater(self.coll, "yuyutei", True)
+        self.prices_scrapers = {
+            "Bigweb": [BigwebScraper()],
+            "Yuyutei": [YuyuteiScraper(), YuyuteiScraper("kizu=1")],
+            "TCG Corner": [TCGCornerScraper()]
+        }
 
-    """
-	You need to have card information from YAMIYugi first before you can
-	update/insert information from Yugipedia properly.
-	"""
+        self.updaters = {
+            "Card info": CardUpdater(self.coll),
+            "TCG Corner": CardPriceUpdater(self.coll, "tcg_corner"),
+            "Bigweb": CardPriceUpdater(self.coll, "bigweb", True),
+            "Yuyutei": CardPriceUpdater(self.coll, "yuyutei", True)
+        }
 
-    def update_cards(self, update_yaml_yugi=True, update_yugipedia=False):
+    def update_cards(self, source: str):
         cards: list[Card] = []
-        if update_yaml_yugi and (yaml_cards := self.yaml_scraper.scrape()):
-            cards += yaml_cards
-        if update_yugipedia and (
-                yugipedia_cards := self.yugipedia_scraper.scrape_all()):
-            cards += yugipedia_cards
+        if source == "YAML Yugi":
+            cards += self.info_scrapers[source].scrape()
+        elif source == "Yugipedia":
+            cards += self.info_scrapers[source].scrape_all()
+        elif source == "All":
+            cards += self.info_scrapers["YAML Yugi"].scrape()
+            cards += self.info_scrapers["Yugipedia"].scrape_all()
 
-        self.card_info_updater.add(cards)
-        self.card_info_updater.execute()
+        self.updaters["Card info"].add(cards)
+        self.updaters["Card info"].execute()
 
-    async def update_prices(
-            self,
-            update_bigweb: bool = False,
-            update_yuyutei: bool = False,
-            update_tcg_corner: bool = False):
+    async def update_prices(self, markets: list[str]):
         async with open_nursery() as nursery:
-            if update_bigweb:
-                nursery.start_soon(
-                    run_sync,
-                    self.task,
-                    self.bigweb_scraper,
-                    self.bigweb_updater)
-
-            if update_yuyutei:
-                nursery.start_soon(
-                    run_sync,
-                    self.task,
-                    self.yuyutei_scraper,
-                    self.yuyutei_updater)
-
-                nursery.start_soon(
-                    run_sync,
-                    self.task,
-                    self.yuyutei_kizu_scraper,
-                    self.yuyutei_updater)
-
-            if update_tcg_corner:
-                nursery.start_soon(
-                    run_sync,
-                    self.task,
-                    self.tcg_corner_scraper,
-                    self.tcg_corner_updater)
+            for market in markets:
+                if market in self.prices_scrapers and market in self.updaters:
+                    for scraper in self.prices_scrapers[market]:
+                        nursery.start_soon(
+                            run_sync,
+                            self.task,
+                            scraper,
+                            self.updaters[market]
+                        )
 
     def task(self, scraper, updater):
         prices = scraper.scrape()
