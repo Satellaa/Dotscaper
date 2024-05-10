@@ -54,14 +54,14 @@ class CardManager:
             self.update_card_info(source)
         elif update_prices:
             source = self.get_user_choice(
-                "Card prices", ["Bigweb", "TCG Corner"])
+                "Card prices", ["Bigweb", "Yuyutei", "TCG Corner"])
             self.update_card_prices(source)
 
     def get_user_choice(self, update_type, sources):
         print(f"Select the update source for {update_type}:")
         for i, source in enumerate(sources, 1):
             print(f"{i}. Only update from {source}")
-        print(f"{len(sources) + 1}. Update both")
+        print(f"{len(sources) + 1}. Update from all")
         print(f"{len(sources) + 2}. Quit")
         choice = input("Enter your selection: ")
 
@@ -86,13 +86,16 @@ class CardManager:
     def update_card_prices(self, choice):
         if choice == "1":
             print("Upsert card prices from Bigweb...")
-            trio.run(self.executor.update_prices)
+            trio.run(self.executor.update_prices, True)
         elif choice == "2":
-            print("Upsert card prices from TCG Corner...")
+            print("Upsert card prices from Yuyu-tei...")
             trio.run(self.executor.update_prices, False, True)
         elif choice == "3":
-            print("Upsert card prices from both Bigweb and TCG Corner...")
-            trio.run(self.executor.update_prices, True, True)
+            print("Upsert card prices from TCG Corner...")
+            trio.run(self.executor.update_prices, False, False, True)
+        elif choice == "4":
+            print("Upsert card prices from Bigweb, Yuyutei and TCG Corner...")
+            trio.run(self.executor.update_prices, True, True, True)
         else:
             print("Invalid selection.")
 

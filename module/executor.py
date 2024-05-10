@@ -7,6 +7,7 @@ from .scrapers.bigweb import BigwebScraper
 from .scrapers.tcg_corner import TCGCornerScraper
 from .scrapers.yaml_yugi import YAMLYugiScraper
 from .scrapers.yugipedia import YugipediaScraper
+from .scrapers.yuyutei import YuyuteiScraper
 from .updaters.card import CardUpdater
 from .updaters.card_price import CardPriceUpdater
 from .utils.card import Card
@@ -24,11 +25,14 @@ class Executor:
         self.yaml_scraper = YAMLYugiScraper()
         self.yugipedia_scraper = YugipediaScraper()
         self.bigweb_scraper = BigwebScraper()
+        self.yuyutei_scraper = YuyuteiScraper()
+        self.yuyutei_kizu_scraper = YuyuteiScraper("kizu=1")
         self.tcg_corner_scraper = TCGCornerScraper()
 
         self.card_info_updater = CardUpdater(self.coll)
         self.tcg_corner_updater = CardPriceUpdater(self.coll, "tcg_corner")
-        self.bigweb_updater = CardPriceUpdater(self.coll, "bigweb")
+        self.bigweb_updater = CardPriceUpdater(self.coll, "bigweb", True)
+        self.yuyutei_updater = CardPriceUpdater(self.coll, "yuyutei", True)
 
     """
 	You need to have card information from YAMIYugi first before you can
@@ -48,7 +52,8 @@ class Executor:
 
     async def update_prices(
             self,
-            update_bigweb: bool = True,
+            update_bigweb: bool = False,
+            update_yuyutei: bool = False,
             update_tcg_corner: bool = False):
         async with open_nursery() as nursery:
             if update_bigweb:
@@ -57,6 +62,20 @@ class Executor:
                     self.task,
                     self.bigweb_scraper,
                     self.bigweb_updater)
+
+            if update_yuyutei:
+                nursery.start_soon(
+                    run_sync,
+                    self.task,
+                    self.yuyutei_scraper,
+                    self.yuyutei_updater)
+
+                nursery.start_soon(
+                    run_sync,
+                    self.task,
+                    self.yuyutei_kizu_scraper,
+                    self.yuyutei_updater)
+
             if update_tcg_corner:
                 nursery.start_soon(
                     run_sync,

@@ -11,7 +11,7 @@ logger = setup_logger("card price updater", "logs/card_price_updater.log")
 
 
 class CardPriceUpdater:
-    def __init__(self, coll: Collection[Card], market: str):
+    def __init__(self, coll: Collection[Card], market: str, check_safe: bool = False):
         self.coll = coll
         self.market = market
         self.operations = []
@@ -21,14 +21,13 @@ class CardPriceUpdater:
         self.card_language = "en" if self.market == "tcg_corner" else "ja"
         self.set_locale = "ae" if self.market == "tcg_corner" else "ja"
 
-        # Bigweb only
-        if market == "bigweb":
+        self.check_safe = check_safe
+        if check_safe:
             # "Token Thanksgiving", "Token Feastevil", "Token Sundae", "Oh Tokenbaum!"
             self.token_in_name_list = [6364, 5733, 9348, 10467]
             self.token_prefix_list = ["JPT", "JPS"]
             self.unsafe_prefix_list = ["-EN", "JPP", "-AE"]
             self.unsafe_comment_list = ["-EN", "-AE"]
-        # end
 
     def execute(self):
         if self.operations:
@@ -63,7 +62,6 @@ class CardPriceUpdater:
         update = None
 
         if existing_price:
-
             filter = {"konami_id": konami_id, f"{path}.id": card_price["id"]}
 
             if card_price["price"] and card_price["price"] != existing_price["price"]:
@@ -77,7 +75,7 @@ class CardPriceUpdater:
                 }
         elif card_price["price"]:
             filter = {"konami_id": konami_id}
-            update = {"$push": {path: card_price}}
+            update = {"$addToSet": {path: card_price}}
 
         if update:
             return UpdateOne(filter, update)
@@ -91,7 +89,7 @@ class CardPriceUpdater:
         if (card := self.find_card_with_set_number(card_price["set_number"])):
             return card
         if (card := next(self.coll.aggregate(name_pipeline), None)):
-            if self.market == "bigweb":
+            if self.check_safe:
                 return self.to_safe(card_price, card)
             return card
 
@@ -128,8 +126,8 @@ class CardPriceUpdater:
 
     def is_unsafe(self, card_price: CardPrice) -> bool:
         return (self.is_in(card_price["set_number"], self.unsafe_prefix_list) or
-                self.is_in(card_price["comment"], self.unsafe_comment_list) or
-                not card_price["comment"] or
+                self.market == "bigweb" and (self.is_in(card_price["comment"], self.unsafe_comment_list) or
+                not card_price["comment"]) or
                 card_price["rarity"] == "-")
 
     def is_in(self, string: str, arr: list) -> bool:

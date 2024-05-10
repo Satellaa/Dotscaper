@@ -6,7 +6,7 @@ from typing import Optional
 import requests
 from selectolax.lexbor import LexborHTMLParser
 
-from ..utils.card import CardPrice
+from ..utils.card import CardPrice, id_from_info
 from ..utils.logger import setup_logger
 from .fetch import get_response
 
@@ -41,7 +41,7 @@ class TCGCornerScraper:
                 page}"
 
             parser = LexborHTMLParser(response.text)
-            collection_items = parser.css('div.collection__item')
+            collection_items = parser.css("div.collection__item")
 
             if len(collection_items) <= 0:
                 break
@@ -85,7 +85,7 @@ class TCGCornerScraper:
                 rarity = self.parse_rarity(a_tag)
 
             card_price = CardPrice(
-                id=self.id_from_info(set_number + rarity),
+                id=id_from_info(set_number + rarity),
                 price=price,
                 name=name,
                 set_number=set_number,
@@ -115,7 +115,3 @@ class TCGCornerScraper:
                     return next_s.text().split(":")[1].strip()
 
         return "Undefined"
-
-    def id_from_info(self, info: str) -> int:
-        return int(
-            str(int.from_bytes(info.upper().strip().encode(), byteorder='big'))[0:6])
