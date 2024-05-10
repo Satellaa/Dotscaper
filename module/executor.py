@@ -1,4 +1,3 @@
-# executor.py
 from pymongo.collection import Collection
 from pymongo.mongo_client import MongoClient
 from trio import open_nursery
