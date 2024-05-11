@@ -13,10 +13,13 @@ load_dotenv()
 class CardManager:
     def __init__(self):
         self.parser = argparse.ArgumentParser(description="Manage card information and prices.")
+        self.parser.add_argument("--init", action="store_true", help="Upsert card information and prices")
         self.parser.add_argument("--update-card-info", action="store_true", help="Upsert card information from YAML Yugi or Yugipedia")
         self.parser.add_argument("--update-card-prices", action="store_true", help="Upsert card prices from selected market")
         self.args = self.parser.parse_args()
         self.executor = None
+
+        self.markets = ["Bigweb", "Yuyutei", "TCG Corner"]
 
     def setup_executor(self):
         print("Setup MongoDB...")
@@ -39,10 +42,9 @@ class CardManager:
         self.executor.update_cards(source)
 
     def update_card_prices(self):
-        sources = ["Bigweb", "Yuyutei", "TCG Corner"]
-        source = self.get_user_choice("Card prices", sources + ["All"])
+        source = self.get_user_choice("Card prices", self.markets + ["All"])
         if source == "All":
-            markets_to_update = sources
+            markets_to_update = self.markets
         else:
             markets_to_update = [source]
 
@@ -75,7 +77,11 @@ class CardManager:
 if __name__ == "__main__":
     manager = CardManager()
     manager.setup_executor()
-    if manager.args.update_card_info:
+    if manager.args.init:
+        print("Initializing...")
+        manager.executor.update_cards("All")
+        trio.run(manager.executor.update_prices, manager.markets)
+    elif manager.args.update_card_info:
         manager.update_card_info()
     elif manager.args.update_card_prices:
         manager.update_card_prices()
