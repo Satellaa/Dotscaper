@@ -53,7 +53,7 @@ class CardPriceUpdater:
         if not card:
             return None
 
-        konami_id = card["konami_id"]
+        document_id = card["_id"]
         path = f"card_prices.{self.market}"
         existing_price = next(
             (cp for cp in card["card_prices"][self.market] if cp["id"] == card_price["id"]), None)
@@ -62,7 +62,7 @@ class CardPriceUpdater:
         update = None
 
         if existing_price:
-            filter = {"konami_id": konami_id, f"{path}.id": card_price["id"]}
+            filter = {"_id": document_id, f"{path}.id": card_price["id"]}
 
             if card_price["price"] and card_price["price"] != existing_price["price"]:
                 update = {"$set": {f"{path}.$": card_price}}
@@ -74,7 +74,7 @@ class CardPriceUpdater:
                     }
                 }
         elif card_price["price"]:
-            filter = {"konami_id": konami_id}
+            filter = {"_id": document_id}
             update = {"$addToSet": {path: card_price}}
 
         if update:
